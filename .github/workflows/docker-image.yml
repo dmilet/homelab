@@ -5,12 +5,12 @@ on:
     branches: 
       - main
     paths:
-      - apps/frontends/flaskapp
+      - 'apps/frontends/flaskapp/**'
   pull_request:
     branches: 
       - main
     paths:
-      - apps/frontends/flaskapp
+      - 'apps/frontends/flaskapp/**'
 
 jobs:
 
