@@ -10,12 +10,12 @@ Configure Virtual Bridge virbr0
     inet 10.23.58.30/24 brd 10.23.58.255 scope global virbr0
        valid_lft forever preferred_lft forever
 ```
-![nm-connection-editor](https://github.com/dmilet/homelab/blob/master/pics/nm-connection-editor_virbr0.png?raw=true)
+![nm-connection-editor](pics/nm-connection-editor_virbr0.png)
 
 ### MicroK8s
 Date: 2024-03-17
 #### Network Bridge (virbr0) 
-![nm-connection-editor](https://github.com/dmilet/homelab/blob/master/pics/virt-manager_virtual_networks_default.png?raw=true)
+![nm-connection-editor](pics/virt-manager_virtual_networks_default.png)
 
 #### Create Disk
 ```console
