@@ -1,5 +1,23 @@
 # Home Lab Setup
 
+## WSL Ubuntu
+### Fix WSL Ubuntu to support python virtual environments
+```
+sudo apt-get update
+sudo apt-get install libpython3-dev
+sudo apt-get install python3-venv
+```
+Reference: [Installing venv for python3 in WSL (Ubuntu)](https://stackoverflow.com/questions/61528500/installing-venv-for-python3-in-wsl-ubuntu)
+
+### install docker
+```
+ sudo apt install docker.io
+``
+
+### install net-tools
+```
+sudo apt install net-tools
+```
 
 ## Linux Laptop
 
