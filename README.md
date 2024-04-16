@@ -204,6 +204,16 @@ Username	admin
 Groups  	[system:masters system:authenticated]
 ```
 
+Create `homelab` namespace
+```
+kubectl create ns homelab
+```
+
+Create Secret to Docker Hub
+```
+kubectl create secret generic dockerhub -n homelab --from-file=.dockerconfigjson=/home/david/.docker/config.json --type=kubernetes.io/dockerconfigjson
+```
+
 Configure port forwarding for Dashboard on port 10443 (HTTPS)
 ```
 kubectl port-forward -n kube-system service/kubernetes-dashboard 10443:443
@@ -228,19 +238,104 @@ helm dep update charts/argo-cd/
 
 Install ArgoCD
 ```
-helm install argo-cd charts/argo-cd
+kubectl create ns argocd
+helm install -n argocd argo-cd charts/argo-cd
 ```
 
 Retrieve ArgoCD admin password
 ```
 ┌──(david㉿kali-PF37QNB7)-[~/.kube]
-└─$ kubectl get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+└─$ kubectl get secret -n argocd argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
 ```
 
 Configure port forwarding for ArgoCD on port 8080 (HTTP)
 ```
 ┌──(david㉿kali-PF37QNB7)-[~/.kube]
-└─$ kubectl port-forward svc/argo-cd-argocd-server 8080:443                                                                                         	 
+└─$ kubectl port-forward -n argocd svc/argo-cd-argocd-server 8080:80
 Forwarding from 127.0.0.1:8080 -> 8080
 Forwarding from [::1]:8080 -> 8080
+```
+
+Configure repository
+in `homelab/configs/argocd/argocd-repositories.yaml`, add the current GitHub personal token (https://github.com/settings/tokens?type=beta)
+Then, apply with
+```
+kubectl apply -n argocd -f argocd-repositories.yaml
+```
+
+![argocd-settings-repositories](pics/argocd_settings_repositories.png)
+
+
+Configure project (from `homelab/configs/argocd/argocd-projects.yaml`)
+```
+kubectl apply -n argocd -f argocd-projects.yaml
+```
+
+
+Install argocd command line
+```
+curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
+rm argocd-linux-amd64
+```
+Reference: [CLI installation](https://argo-cd.readthedocs.io/en/stable/cli_installation/)
+
+Deploy App or Apps
+```
+└─$ argocd login localhost:8080
+WARNING: server is not configured with TLS. Proceed (y/n)?            
+Username: admin
+Password:                                                                      
+'admin:login' logged in successfully                                                                                                                                                                                                        
+Context 'localhost:8080' updated                                                                        
+
+argocd app create homelabapps \
+    --project default \
+    --dest-namespace argocd \
+    --dest-server https://kubernetes.default.svc \
+    --repo https://github.com/dmilet/homelab-deployments.git \
+    --path apps  
+```
+
+![argocd_app-of-apps_1](pics/argocd_app-of-apps_1.png)
+
+
+
+```
+└─$ argocd app sync homelabapps
+TIMESTAMP                  GROUP              KIND    NAMESPACE                  NAME    STATUS    HEALTH        HOOK  MESSAGE
+2024-04-16T16:30:25-04:00  argoproj.io  Application     homelab     frontend-flaskapp  OutOfSync  Missing
+2024-04-16T16:30:26-04:00  argoproj.io  Application     homelab     frontend-flaskapp  OutOfSync  Missing              application.argoproj.io/frontend-flaskapp created
+2024-04-16T16:30:26-04:00  argoproj.io  Application     homelab     frontend-flaskapp    Synced  Missing              application.argoproj.io/frontend-flaskapp created
+
+Name:               default/homelabapps
+Project:            default
+Server:             https://kubernetes.default.svc
+Namespace:          homelab
+URL:                https://argocd.example.com/applications/homelabapps
+Repo:               https://github.com/dmilet/homelab-deployments.git
+Target:                                                                                                                                                                         
+Path:               apps                                        
+SyncWindow:         Sync Allowed                                   
+Sync Policy:        <none>                                        
+Sync Status:        Synced to  (d695041)                             
+Health Status:      Healthy                                        
+
+Operation:          Sync                                        
+Sync Revision:      d695041efd83e355d7ad2c4c172a183afd6b9647                                        
+Phase:              Succeeded                                        
+Start:              2024-04-16 16:30:25 -0400 EDT              
+Finished:           2024-04-16 16:30:26 -0400 EDT              
+Duration:           1s                                        
+Message:            successfully synced (all tasks run)         
+
+GROUP        KIND         NAMESPACE  NAME               STATUS  HEALTH  HOOK  MESSAGE
+argoproj.io  Application  homelab    frontend-flaskapp  Synced                application.argoproj.io/frontend-flaskapp created
+```
+![argocd_app-of-apps_2](pics/argocd_app-of-apps_2.png)
+
+
+Sync individual apps
+```
+argocd app sync -l argocd.argoproj.io/instance=homelabapps
 ```
