@@ -69,7 +69,7 @@ jobs:
 
 
     - name: update values files for new RELEASE_ID
-      run: sed "s/frontends-flaskappp-.*$/frontends-flaskappp-${{ needs.build.outputs.RELEASE_ID }}/g" values/homelab/frontend.yaml
+      run: sed -i "s/frontends-flaskappp-.*$/frontends-flaskappp-${{ needs.build.outputs.RELEASE_ID }}/g" values/homelab/frontend.yaml
 
     - name: confirm change done
       run: cat values/homelab/frontend.yaml
