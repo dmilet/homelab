@@ -10,7 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    
+    - run: |
+        echo "### last comment" >> .github/workflows/bump_up_release.yml
     - name: Commit to new branch
       uses: devops-infra/action-commit-push@master
       with:
