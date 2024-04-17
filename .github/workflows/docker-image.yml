@@ -83,20 +83,15 @@ jobs:
         git commit -m "Release ${{ needs.build.outputs.RELEASE_ID }}"
         git push origin release/${{ needs.build.outputs.RELEASE_ID }}
 
-    # - name: Commit to new branch
-    #   uses: devops-infra/action-commit-push@master
-    #   with:
-    #     github_token: ${{ github.token }}
-    #     add_timestamp: false
-    #     commit_prefix: "[AUTO]"
-    #     commit_message: "Release ${{ needs.build.outputs.RELEASE_ID }}"
-    #     force: true
-    #     target_branch: "release/${{ needs.build.outputs.RELEASE_ID }}"
-    # - name: Create pull request
-    #   uses: devops-infra/action-pull-request@master
-    #   with:
-    #     github_token: ${{ github.token }}
-    #     body: "**Automated pull request**<br><br>Replaced foo/bar"
-    #     title: ${{ github.event.commits[0].message }}
-    #     source_branch: "release/${{ needs.build.outputs.RELEASE_ID }}"
-    #     target_branch: main
+        # Store the PAT in a file that can be accessed by the
+        # GitHub CLI.
+        echo "${{ secrets.HOMELAB_ACTIONS_RW }}" > token.txt
+
+        # Authorize GitHub CLI for the current repository and
+        # create a pull-requests containing the updates.
+        gh auth login --with-token < token.txt
+        gh pr create \
+          --body "Release ${{ needs.build.outputs.RELEASE_ID }}" \
+          --title "Release ${{ needs.build.outputs.RELEASE_ID }}" \
+          --head "release/${{ needs.build.outputs.RELEASE_ID }}" \
+          --base "main"
