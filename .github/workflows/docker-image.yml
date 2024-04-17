@@ -1,6 +1,7 @@
 name: Docker Image CI Frontend - Flask App
 
 on:
+  workflow_dispatch:
   push:
     branches: 
       - main
@@ -16,11 +17,10 @@ on:
 jobs:
 
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     # - uses: microsoft/action-python@0.7.2
     #   with:
     #     root: apps/frontends/flaskapp
@@ -41,4 +41,28 @@ jobs:
         tags: "davidmilet/homelab:frontends-flaskappp-${{ env.RELEASE_ID }}"
         push: true
 
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    # deploy only if built from main branch
+    if: github.ref == 'refs/heads/main'
+    steps:    
+    # - uses: actions/checkout@v4
+    # - run: |
+    #      grep RELEASE_ID apps/frontends/flaskapp/properties.sh >> $GITHUB_ENV
+
+    - run: echo "Release ID = ${{ env.RELEASE_ID }}"
+
     # update helm chart 
+    - uses: actions/checkout@v4
+      with:
+        repository: 'https://github.com/dmilet/homelab-deployments.git'
+        ref: 'refs/heads/main'
+        # Default: ${{ github.token }}
+        #token: '${{ secrets.GITHUB_RW_TOKEN }} '
+        # Relative path under $GITHUB_WORKSPACE to place the repository
+        #path: 'homelab-deployments'
+
+    - run: cat values/homelab/frontend.yaml
+    - run: sed "s/frontends-flaskappp-.*$/frontends-flaskappp-${{ env.RELEASE_ID }}/g" values/homelab/frontend.yaml
