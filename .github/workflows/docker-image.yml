@@ -18,7 +18,8 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-
+    outputs:
+      RELEASE_ID: "${{ env.RELEASE_ID }}"
     steps:
     - uses: actions/checkout@v4
     # - uses: microsoft/action-python@0.7.2
@@ -32,7 +33,8 @@ jobs:
       with:
         username: "${{ secrets.DOCKERHUB_USERNAME }}"
         password: "${{ secrets.DOCKERHUB_PASSWORD }}"
-    - run: |
+    - name: Retrieve RELEASE_ID
+      run: |
          grep RELEASE_ID apps/frontends/flaskapp/properties.sh >> $GITHUB_ENV
     - uses: docker/build-push-action@v5.3.0
       with:
@@ -50,9 +52,10 @@ jobs:
     steps:    
     # - uses: actions/checkout@v4
     # - run: |
-    #      grep RELEASE_ID apps/frontends/flaskapp/properties.sh >> $GITHUB_ENV
+    #       grep RELEASE_ID apps/frontends/flaskapp/properties.sh >> $GITHUB_ENV
 
-    - run: echo "Release ID = ${{ env.RELEASE_ID }}"
+    - name: Show RELEASE_ID
+      run: echo "Release ID = ${{ needs.build.outputs.RELEASE_ID }}"
 
     # update helm chart 
     - uses: actions/checkout@v4
@@ -65,4 +68,4 @@ jobs:
         #path: 'homelab-deployments'
 
     - run: cat values/homelab/frontend.yaml
-    - run: sed "s/frontends-flaskappp-.*$/frontends-flaskappp-${{ env.RELEASE_ID }}/g" values/homelab/frontend.yaml
+    - run: sed "s/frontends-flaskappp-.*$/frontends-flaskappp-${{ needs.build.outputs.RELEASE_ID }}/g" values/homelab/frontend.yaml
