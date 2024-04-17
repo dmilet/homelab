@@ -35,5 +35,5 @@ jobs:
       with:
         context: apps/frontends/flaskapp
         file: apps/frontends/flaskapp/Dockerfile
-        tags: "davidmilet/homelab:frontends-flaskappp-0.0.1"
+        tags: "davidmilet/homelab:frontends-flaskappp-0.0.2"
         push: true

@@ -294,7 +294,7 @@ argocd app create homelabapps \
     --dest-namespace argocd \
     --dest-server https://kubernetes.default.svc \
     --repo https://github.com/dmilet/homelab-deployments.git \
-    --path apps  
+    --path app-of-apps  
 ```
 
 ![argocd_app-of-apps_1](pics/argocd_app-of-apps_1.png)
@@ -315,7 +315,7 @@ Namespace:          homelab
 URL:                https://argocd.example.com/applications/homelabapps
 Repo:               https://github.com/dmilet/homelab-deployments.git
 Target:                                                                                                                                                                         
-Path:               apps                                        
+Path:               app-of-apps                                        
 SyncWindow:         Sync Allowed                                   
 Sync Policy:        <none>                                        
 Sync Status:        Synced to  (d695041)                             

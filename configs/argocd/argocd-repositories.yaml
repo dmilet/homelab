@@ -15,3 +15,20 @@ stringData:
   insecure: "false" # Ignore validity of server's TLS certificate. Defaults to "false"
   forceHttpBasicAuth: "false" # Skip auth method negotiation and force usage of HTTP basic auth. Defaults to "false"
   enableLfs: "false" # Enable git-lfs for this repository. Defaults to "false"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dockerhub-davidmilet
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+stringData:
+  type: helm
+  enableOCI: "true"
+  name: dockerhub-davidmilet
+  url: registry-1.docker.io/davidmilet
+  password: xxx
+  username: davidmilet
+
+
