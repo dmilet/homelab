@@ -204,14 +204,16 @@ Username	admin
 Groups  	[system:masters system:authenticated]
 ```
 
-Create `homelab` namespace
+Create `homelab` and `prod` namespaces
 ```
 kubectl create ns homelab
+kubectl create ns prod
 ```
 
 Create Secret to Docker Hub
 ```
 kubectl create secret generic dockerhub -n homelab --from-file=.dockerconfigjson=/home/david/.docker/config.json --type=kubernetes.io/dockerconfigjson
+kubectl create secret generic dockerhub -n prod --from-file=.dockerconfigjson=/home/david/.docker/config.json --type=kubernetes.io/dockerconfigjson
 ```
 
 Configure port forwarding for Dashboard on port 10443 (HTTPS)
