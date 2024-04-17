@@ -57,8 +57,8 @@ jobs:
     # update helm chart 
     - uses: actions/checkout@v4
       with:
-        repository: 'https://github.com/dmilet/homelab-deployments.git'
-        ref: 'refs/heads/main'
+        repository: dmilet/homelab-deployments
+        ref: refs/heads/main
         # Default: ${{ github.token }}
         #token: '${{ secrets.GITHUB_RW_TOKEN }} '
         # Relative path under $GITHUB_WORKSPACE to place the repository
