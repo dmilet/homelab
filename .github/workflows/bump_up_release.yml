@@ -18,5 +18,5 @@ jobs:
         add_timestamp: true
         commit_prefix: "[AUTO]"
         commit_message: "Automatic commit"
-        force: false
+        force: true
         target_branch: release/$RELEASE_ID
