@@ -40,3 +40,5 @@ jobs:
         file: apps/frontends/flaskapp/Dockerfile
         tags: "davidmilet/homelab:frontends-flaskappp-${{ env.RELEASE_ID }}"
         push: true
+
+    # update helm chart 
