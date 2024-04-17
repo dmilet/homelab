@@ -63,7 +63,7 @@ jobs:
         repository: dmilet/homelab-deployments
         ref: refs/heads/main
         # Default: ${{ github.token }}
-        #token: '${{ secrets.GITHUB_RW_TOKEN }} '
+        token: '${{ secrets.HOMELAB_ACTIONS_RW }}'
         # Relative path under $GITHUB_WORKSPACE to place the repository
         #path: 'homelab-deployments'
 
