@@ -12,6 +12,7 @@ on:
     paths:
       - 'apps/frontends/flaskapp/**'
 
+
 jobs:
 
   build:
@@ -31,9 +32,11 @@ jobs:
       with:
         username: "${{ secrets.DOCKERHUB_USERNAME }}"
         password: "${{ secrets.DOCKERHUB_PASSWORD }}"
+    - run: |
+         grep RELEASE_ID apps/frontends/flaskapp/properties.sh >> $GITHUB_ENV
     - uses: docker/build-push-action@v5.3.0
       with:
         context: apps/frontends/flaskapp
         file: apps/frontends/flaskapp/Dockerfile
-        tags: "davidmilet/homelab:frontends-flaskappp-0.0.2"
+        tags: "davidmilet/homelab:frontends-flaskappp-${{ env.RELEASE_ID }}"
         push: true
