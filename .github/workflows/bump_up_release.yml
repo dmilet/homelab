@@ -1,0 +1,22 @@
+name: Bump up release number
+
+on: workflow_dispatch
+
+env:
+  RELEASE_ID: 0.0.2
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Commit to new branch
+      uses: devops-infra/action-commit-push@master
+      with:
+        github_token: "${{ secrets.GITHUB_TOKEN }}"
+        add_timestamp: true
+        commit_prefix: "[AUTO]"
+        commit_message: "Automatic commit"
+        force: false
+        target_branch: release/$RELEASE_ID
