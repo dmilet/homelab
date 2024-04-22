@@ -30,5 +30,29 @@ stringData:
   url: registry-1.docker.io/davidmilet
   password: xxx
   username: davidmilet
-
-
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: bitnamicharts
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+stringData:
+  type: helm
+  enableOCI: "true"
+  name: bitnamicharts
+  url: registry-1.docker.io/bitnamicharts
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nexus
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+stringData:
+  type: helm
+  enableOCI: "true"
+  name: nexus
+  url: lab-nxrm-nexusrepo.nxrm.svc.cluster.local:8444

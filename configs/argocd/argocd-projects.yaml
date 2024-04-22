@@ -1,20 +1,45 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: homelab
+  name: lab
   namespace: argocd
   # Finalizer that ensures that project is not deleted until it is not referenced by any application
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  description: homelab
+  description: lab
+  # Allow manifests to deploy from any Git repos
+  sourceRepos:
+  - 'https://github.com/dmilet/homelab-deployments'
+  - 'registry-1.docker.io/bitnamicharts'
+  - 'lab-nxrm-nexusrepo.nxrm.svc.cluster.local:8444'
+  # Only permit applications to deploy to the guestbook namespace in the same cluster
+  destinations:
+  - namespace: postgres
+    server: https://kubernetes.default.svc
+  - namespace: nxrm
+    server: https://kubernetes.default.svc
+  - namespace: hashivault
+    server: https://kubernetes.default.svc
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: dev
+  namespace: argocd
+  # Finalizer that ensures that project is not deleted until it is not referenced by any application
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: dev
   # Allow manifests to deploy from any Git repos
   sourceRepos:
   - 'https://github.com/dmilet/homelab-deployments'
   - 'registry-1.docker.io/davidmilet'
+  - 'lab-nxrm-nexusrepo.nxrm.svc.cluster.local:8444'
   # Only permit applications to deploy to the guestbook namespace in the same cluster
   destinations:
-  - namespace: homelab
+  - namespace: dev
     server: https://kubernetes.default.svc
 ---
 apiVersion: argoproj.io/v1alpha1
@@ -31,7 +56,8 @@ spec:
   sourceRepos:
   - 'https://github.com/dmilet/homelab-deployments'
   - 'registry-1.docker.io/davidmilet'
-  # Only permit applications to deploy to the guestbook namespace in the same cluster
+  - 'lab-nxrm-nexusrepo.nxrm.svc.cluster.local:8444'
+    # Only permit applications to deploy to the guestbook namespace in the same cluster
   destinations:
   - namespace: prod
     server: https://kubernetes.default.svc

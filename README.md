@@ -40,10 +40,14 @@ Date: 2024-03-17
 sudo -iu root
 cd /var/lib/libvirt/images
 qemu-img create -f qcow2 umksn1.qcow2 20G
+qemu-img create -f qcow2 umksn1-pvc.qcow2 20G
 chown libvirt-qemu:libvirt-qemu umksn1.qcow2
+chown libvirt-qemu:libvirt-qemu umksn1-pvc.qcow2
 
 ls -l umksn1.qcow2
 -rw-r--r-- 1 libvirt-qemu libvirt-qemu      196928 Mar 17 13:43 umksn1.qcow2
+ls -l umksn1-pvc.qcow2
+-rw-r--r-- 1 libvirt-qemu libvirt-qemu 196928 Apr 19 11:32 umksn1-pvc.qcow2
 ```
 
 #### Install Ubuntu Server
@@ -55,9 +59,23 @@ ls -l umksn1.qcow2
 | OS   | [Ubuntu Server 22.04.4 LTS ISO media](https://releases.ubuntu.com/jammy/ubuntu-22.04.4-live-server-amd64.iso) | 
 | RAM  | 8 GB |
 | CPU  | 4    |
-| Disk | 20GB. Attach umksn1.qcow2 disk (see above) |
+| Disk1 | 20GB. Attach umksn1.qcow2 disk (see above) |
+| Disk2 | 20GB. Attach umksn1-pvc.qcow2 disk (see above) |
 | Network | virbr0 | 
 
+
+Note: to attach disk device, create XML file like
+```
+<disk type="file" device="disk">
+  <driver name="qemu" type="qcow2"/>
+  <source file="/var/lib/libvirt/images/umksn1-pvc.qcow2"/>
+  <target dev="vdb" bus="virtio"/>
+</disk>
+```
+Then, attach to VM
+```
+virsh attach-device --config Ubuntu-MicroK8S-Node1 vdb.xml
+```
 
 Install OpenSSH server
 
@@ -106,7 +124,22 @@ Now try logging into the machine, with:   "ssh 'david@umksn1'"
 and check to make sure that only the key(s) you wanted were added.                                             
 ```
 
+Create VG on /dev/vdb for the persistent storage
+```
+pvcreate /dev/vdb
+vgcreate pvc-vg /dev/vdb
+vgs
+  VG        #PV #LV #SN Attr   VSize   VFree
+  pvc-vg      1   0   0 wz--n- <20.00g <20.00g
+  ubuntu-vg   1   1   0 wz--n-  18.22g  20.00m
 
+mkdir /pvc
+lvcreate -n pvc-lv -l 5119 /dev/pvc-vg
+mkfs.xfs /dev/pvc-vg/pvc-lv
+echo "/dev/pvc-vg/pvc-lv /pvc xfs defaults" >> /etc/fstab
+mount -a
+chmod 777 /pvc
+```
 
 
 #### MicroK8s installation
@@ -204,23 +237,48 @@ Username	admin
 Groups  	[system:masters system:authenticated]
 ```
 
-Create `homelab` and `prod` namespaces
+Create namespaces
 ```
-kubectl create ns homelab
+kubectl create ns dev
 kubectl create ns prod
+kubectl create ns nxrm
+kubectl create ns postgres
+kubectl create ns hashivault
 ```
 
 Create Secret to Docker Hub
 ```
-kubectl create secret generic dockerhub -n homelab --from-file=.dockerconfigjson=/home/david/.docker/config.json --type=kubernetes.io/dockerconfigjson
+kubectl create secret generic dockerhub -n dev --from-file=.dockerconfigjson=/home/david/.docker/config.json --type=kubernetes.io/dockerconfigjson
 kubectl create secret generic dockerhub -n prod --from-file=.dockerconfigjson=/home/david/.docker/config.json --type=kubernetes.io/dockerconfigjson
+```
+
+Create Storage Class for PVC, under 
+```
+cat configs/microk8s/microk8s-custom-hostpath-pvc.yaml
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: microk8s-custom-hostpath-pvc
+provisioner: microk8s.io/hostpath
+reclaimPolicy: Delete
+parameters:
+  pvDir: /pvc
+volumeBindingMode: WaitForFirstConsumer
+
+
+kubectl apply -f microk8s-custom-hostpath-pvc.taml
+
+kubectl get sc
+NAME                           PROVISIONER            RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+microk8s-custom-hostpath-pvc   microk8s.io/hostpath   Delete          WaitForFirstConsumer   false                  45s
+microk8s-hostpath (default)    microk8s.io/hostpath   Delete          WaitForFirstConsumer   false                  32d 
 ```
 
 Configure port forwarding for Dashboard on port 10443 (HTTPS)
 ```
 kubectl port-forward -n kube-system service/kubernetes-dashboard 10443:443
 ```
-
+Reference: (https://microk8s.io/docs/addon-hostpath-storage)
 
 
 ### ArgoCD
@@ -291,12 +349,25 @@ Password:
 'admin:login' logged in successfully                                                                                                                                                                                                        
 Context 'localhost:8080' updated                                                                        
 
-argocd app create homelabapps \
+argocd app create dev \
     --project default \
     --dest-namespace argocd \
     --dest-server https://kubernetes.default.svc \
     --repo https://github.com/dmilet/homelab-deployments.git \
-    --path app-of-apps  
+    --path app-of-apps/dev
+argocd app create prod \
+    --project default \
+    --dest-namespace argocd \
+    --dest-server https://kubernetes.default.svc \
+    --repo https://github.com/dmilet/homelab-deployments.git \
+    --path app-of-apps/prod
+
+argocd app create lab \
+    --project default \
+    --dest-namespace argocd \
+    --dest-server https://kubernetes.default.svc \
+    --repo https://github.com/dmilet/homelab-deployments.git \
+    --path app-of-apps/lab
 ```
 
 ![argocd_app-of-apps_1](pics/argocd_app-of-apps_1.png)
@@ -304,7 +375,7 @@ argocd app create homelabapps \
 
 
 ```
-└─$ argocd app sync homelabapps
+└─$ argocd app sync lap
 TIMESTAMP                  GROUP              KIND    NAMESPACE                  NAME    STATUS    HEALTH        HOOK  MESSAGE
 2024-04-16T16:30:25-04:00  argoproj.io  Application     homelab     frontend-flaskapp  OutOfSync  Missing
 2024-04-16T16:30:26-04:00  argoproj.io  Application     homelab     frontend-flaskapp  OutOfSync  Missing              application.argoproj.io/frontend-flaskapp created
@@ -341,3 +412,42 @@ Sync individual apps
 ```
 argocd app sync -l argocd.argoproj.io/instance=homelabapps
 ```
+
+
+### Postgres
+In `postgres` namespace, create secret with postgres user password to be use by helm chart for the initialization of the database
+```
+kubectl create secret generic -n postgres lab-postgres-passwords  --from-literal=postgres=xxx
+```
+
+Now sync the lab/postgres app from ArgoCD
+
+### Nexusitory Manager
+Nexus Repository Manager Helm chart only supports HA config and Postgres which requires PRO licence.
+For this lab setup, we use our own Helm Chart.
+Make sure that the nexusrepo application is deployed successfully in the LAB project
+
+![lab-nxrm-nexusrepo.png](pics/lab-nxrm-nexusrepo.png)
+
+
+
+Then execute shell into the nexus repo pod:
+```
+kubectl exec -it -n nxrm lab-nxrm-nexusrepo-git-nexusrepo-0 /bin/sh
+
+mv /nexus-data/etc/nexus.properties /nexus-data/etc/nexus.properties.orig
+ln -s /nexus-configs/nexus.properties nexus.properties
+```
+
+Next, kill the pod to get it restarted
+```
+kubectl delete pod -n nxrm lab-nxrm-nexusrepo-git-nexusrepo-0
+```
+
+Finally 
+```
+kubectl port-forward -n nxrm  svc/lab-nxrm-nexusrepo 8443:8443
+kubectl port-forward -n nxrm  svc/lab-nxrm-nexusrepo 8444:8444
+```
+
+
