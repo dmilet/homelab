@@ -12,7 +12,7 @@ Reference: [Installing venv for python3 in WSL (Ubuntu)](https://stackoverflow.c
 ### install docker
 ```
  sudo apt install docker.io
-``
+```
 
 ### install net-tools
 ```
@@ -156,7 +156,7 @@ sudo reboot
 
 Upgrade MicroK8s
 ```
-sudo snap refresh microk8s --channel 1.29
+sudo snap refresh microk8s --channel 1.31
 ```
 
 Enable add-ons
@@ -273,12 +273,18 @@ NAME                           PROVISIONER            RECLAIMPOLICY   VOLUMEBIND
 microk8s-custom-hostpath-pvc   microk8s.io/hostpath   Delete          WaitForFirstConsumer   false                  45s
 microk8s-hostpath (default)    microk8s.io/hostpath   Delete          WaitForFirstConsumer   false                  32d 
 ```
+Reference: (https://microk8s.io/docs/addon-hostpath-storage)
 
 Configure port forwarding for Dashboard on port 10443 (HTTPS)
 ```
 kubectl port-forward -n kube-system service/kubernetes-dashboard 10443:443
 ```
-Reference: (https://microk8s.io/docs/addon-hostpath-storage)
+
+Retrieve token to login to dashboard (https://localhost:10443)
+
+```
+kubectl -n kube-system describe secret microk8s-dashboard-token
+```
 
 
 ### ArgoCD
@@ -293,6 +299,25 @@ version.BuildInfo{Version:"v3.14+unreleased", GitCommit:"", GitTreeState:"", GoV
 Add ArgoCD Helm Repo
 ```
 helm repo add argo-cd https://argoproj.github.io/argo-helm
+helm repo update
+```
+
+Search latest version of argo-cd helm chart
+```
+helm search repo argo-cd
+```
+
+Edit chart version in charts/argo-cd/Chart.yaml. Keep chart version and dependency version aligned for clarity
+```
+version: 7.6.8
+dependencies:
+  - name: argo-cd
+    version: 7.6.8   # most recent tag as of 10/13/24
+    repository: https://argoproj.github.io/argo-helm
+```
+
+Update dependency for argo-cd chart. This will create Chart.lock file with references to upstream chart.
+```
 helm dep update charts/argo-cd/
 ```
 
@@ -300,6 +325,11 @@ Install ArgoCD
 ```
 kubectl create ns argocd
 helm install -n argocd argo-cd charts/argo-cd
+```
+
+Or upgrade ArgoCD
+```
+helm upgrade -n argocd argo-cd charts/argo-cd
 ```
 
 Retrieve ArgoCD admin password
@@ -422,7 +452,7 @@ kubectl create secret generic -n postgres lab-postgres-passwords  --from-literal
 
 Now sync the lab/postgres app from ArgoCD
 
-### Nexusitory Manager
+### Nexus repository Manager
 Nexus Repository Manager Helm chart only supports HA config and Postgres which requires PRO licence.
 For this lab setup, we use our own Helm Chart.
 Make sure that the nexusrepo application is deployed successfully in the LAB project
