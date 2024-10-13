@@ -1,4 +1,12 @@
 # Home Lab Setup
+## GitHub 
+
+### Personal Access Tokens
+https://github.com/settings/tokens?type=beta
+
+![homelab-actions-rw](pics/homelab-actions-rw.png)
+![homelab-ro](pics/homelab-ro.png)
+
 
 ## WSL Ubuntu
 ### Fix WSL Ubuntu to support python virtual environments
@@ -330,6 +338,12 @@ helm install -n argocd argo-cd charts/argo-cd
 Or upgrade ArgoCD
 ```
 helm upgrade -n argocd argo-cd charts/argo-cd
+```
+
+Install ArgoCD Triggers and Templates
+```
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/notifications_catalog/install.yaml
+kubectl get cm -n argocd
 ```
 
 Retrieve ArgoCD admin password
