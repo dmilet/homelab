@@ -338,6 +338,8 @@ helm install -n argocd argo-cd charts/argo-cd
 Or upgrade ArgoCD
 ```
 helm upgrade -n argocd argo-cd charts/argo-cd
+# if needed, sometimes server is missing some auto-generated secret key
+kubectl rollout restart -n argocd deploy/argo-cd-argocd-server
 ```
 
 Install ArgoCD Triggers and Templates

@@ -7,5 +7,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY src/main.py .
 
-CMD [ "python", "-m", "flask" , "--app", "main", "run", "-p", "8080" ]
+CMD [ "python", "-m", "flask" , "--app", "main", "run", "-p", "8080", "--host", "0.0.0.0" ]
 
