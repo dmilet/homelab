@@ -1,6 +1,7 @@
 from flask import Flask
 from flask import Response
 from flask import request
+import json
 
 app = Flask(__name__)
 
@@ -12,5 +13,7 @@ def get_hello_world():
 @app.route("/", methods = ['POST'])
 def post_hello_world():
     events = request.form
-    print (f"{events}")
+    f = open("events.log", "a")
+    f.write(json.dumps(events))
+    f.close()
     return Response(events, status=201, mimetype='application/json')
