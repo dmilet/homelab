@@ -12,7 +12,7 @@ def get_hello_world():
 
 @app.route("/", methods = ['POST'])
 def post_hello_world():
-    events = request.form
+    events = request.get_json()
     f = open("events.log", "a")
     f.write(json.dumps(events))
     f.close()
