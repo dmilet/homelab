@@ -2,9 +2,9 @@ argo-cd:
   dex:
     enabled: false
   notifications:
-    enabled: false
+    enabled: true
   applicationSet:
-    enabled: false
+    enabled: true
   server:
     extraArgs:
       - --insecure
