@@ -6,56 +6,225 @@ data:
         method: POST
         path: /
         body: |
-          { "app": "{{.app.metadata.name}}", "event": "app-created" }
+          { "app": "{{.app.metadata.name}}",
+            "deploymentid": "{{ .app.metadata.labels.deploymentid }}",
+            "appversion": "{{ .app.metadata.labels.appversion }}",
+            "fields": [
+            {
+              "title": "Sync Status",
+              "value": "{{.app.status.sync.status}}"
+            },
+            {
+              "title": "Repository",
+              "value": "{{.app.spec.source.repoURL}}"
+            }
+            {{range $index, $c := .app.status.conditions}}
+            {{if not $index}},{{end}}
+            {{if $index}},{{end}}
+            {
+              "title": "{{$c.type}}",
+              "value": "{{$c.message}}"
+            }
+            {{end}}
+            ]
+          }
+
   template.app-deleted: |
     webhook:
       events-aggregator:
         method: POST
         path: /
         body: |
-          { "app": "{{ .app.metadata.name}}", "event": "app-deleted" }
+          { "app": "{{.app.metadata.name}}",
+            "deploymentid": "{{ .app.metadata.labels.deploymentid }}",
+            "appversion": "{{ .app.metadata.labels.appversion }}",
+            "fields": [
+            {
+              "title": "Sync Status",
+              "value": "{{.app.status.sync.status}}"
+            },
+            {
+              "title": "Repository",
+              "value": "{{.app.spec.source.repoURL}}"
+            }
+            {{range $index, $c := .app.status.conditions}}
+            {{if not $index}},{{end}}
+            {{if $index}},{{end}}
+            {
+              "title": "{{$c.type}}",
+              "value": "{{$c.message}}"
+            }
+            {{end}}
+            ]
+          }
   template.app-deployed: |
     webhook:
       events-aggregator:
         method: POST
         path: /
         body: |
-          { "app": "{{ .app.metadata.name}}", "event": "template.app-deployed" }
+          { "app": "{{.app.metadata.name}}",
+            "deploymentid": "{{ .app.metadata.labels.deploymentid }}",
+            "appversion": "{{ .app.metadata.labels.appversion }}",
+            "fields": [
+            {
+              "title": "Sync Status",
+              "value": "{{.app.status.sync.status}}"
+            },
+            {
+              "title": "Repository",
+              "value": "{{.app.spec.source.repoURL}}"
+            }
+            {{range $index, $c := .app.status.conditions}}
+            {{if not $index}},{{end}}
+            {{if $index}},{{end}}
+            {
+              "title": "{{$c.type}}",
+              "value": "{{$c.message}}"
+            }
+            {{end}}
+            ]
+          }
   template.app-health-degraded: |
     webhook:
       events-aggregator:
         method: POST
         path: /
         body: |
-          { "app": "{{ .app.metadata.name}}", "event": "app-health-degraded" }
+          { "app": "{{.app.metadata.name}}",
+            "deploymentid": "{{ .app.metadata.labels.deploymentid }}",
+            "appversion": "{{ .app.metadata.labels.appversion }}",
+            "fields": [
+            {
+              "title": "Sync Status",
+              "value": "{{.app.status.sync.status}}"
+            },
+            {
+              "title": "Repository",
+              "value": "{{.app.spec.source.repoURL}}"
+            }
+            {{range $index, $c := .app.status.conditions}}
+            {{if not $index}},{{end}}
+            {{if $index}},{{end}}
+            {
+              "title": "{{$c.type}}",
+              "value": "{{$c.message}}"
+            }
+            {{end}}
+            ]
+          }
   template.app-sync-failed: |
     webhook:
       events-aggregator:
         method: POST
         path: /
         body: |
-          { "app": "{{ .app.metadata.name}}", "event": "app-sync-failed" }
+          { "app": "{{.app.metadata.name}}",
+            "deploymentid": "{{ .app.metadata.labels.deploymentid }}",
+            "appversion": "{{ .app.metadata.labels.appversion }}",
+            "fields": [
+            {
+              "title": "Sync Status",
+              "value": "{{.app.status.sync.status}}"
+            },
+            {
+              "title": "Repository",
+              "value": "{{.app.spec.source.repoURL}}"
+            }
+            {{range $index, $c := .app.status.conditions}}
+            {{if not $index}},{{end}}
+            {{if $index}},{{end}}
+            {
+              "title": "{{$c.type}}",
+              "value": "{{$c.message}}"
+            }
+            {{end}}
+            ]
+          }
   template.app-sync-running: |
     webhook:
       events-aggregator:
         method: POST
         path: /
         body: |
-          { "app": "{{ .app.metadata.name}}", "event": "template.app-sync-running" }
+          { "app": "{{.app.metadata.name}}",
+            "deploymentid": "{{ .app.metadata.labels.deploymentid }}",
+            "appversion": "{{ .app.metadata.labels.appversion }}",
+            "fields": [
+            {
+              "title": "Sync Status",
+              "value": "{{.app.status.sync.status}}"
+            },
+            {
+              "title": "Repository",
+              "value": "{{.app.spec.source.repoURL}}"
+            }
+            {{range $index, $c := .app.status.conditions}}
+            {{if not $index}},{{end}}
+            {{if $index}},{{end}}
+            {
+              "title": "{{$c.type}}",
+              "value": "{{$c.message}}"
+            }
+            {{end}}
+            ]
+          }
   template.app-sync-status-unknown: |
     webhook:
       events-aggregator:
         method: POST
         path: /
         body: |
-          { "app": "{{ .app.metadata.name}}", "event": "app-sync-status-unknown" }
+          { "app": "{{.app.metadata.name}}",
+            "deploymentid": "{{ .app.metadata.labels.deploymentid }}",
+            "appversion": "{{ .app.metadata.labels.appversion }}",
+            "fields": [
+            {
+              "title": "Sync Status",
+              "value": "{{.app.status.sync.status}}"
+            },
+            {
+              "title": "Repository",
+              "value": "{{.app.spec.source.repoURL}}"
+            }
+            {{range $index, $c := .app.status.conditions}}
+            {{if not $index}},{{end}}
+            {{if $index}},{{end}}
+            {
+              "title": "{{$c.type}}",
+              "value": "{{$c.message}}"
+            }
+            {{end}}
+            ]
+          }
   template.app-sync-succeeded: |
     webhook:
       events-aggregator:
         method: POST
         path: /
         body: |
-          { "app": "{{ .app.metadata.name}}", "event": "app-sync-succeeded" }
+          { "app": "{{.app.metadata.name}}",
+            "deploymentid": "{{ .app.metadata.labels.deploymentid }}",
+            "appversion": "{{ .app.metadata.labels.appversion }}",
+            "fields": [
+            {
+              "title": "Sync Status",
+              "value": "{{.app.status.sync.status}}"
+            },
+            {
+              "title": "Repository",
+              "value": "{{.app.spec.source.repoURL}}"
+            }
+            {{range $index, $c := .app.status.conditions}}
+            {{if not $index}},{{end}}
+            {{if $index}},{{end}}
+            {
+              "title": "{{$c.type}}",
+              "value": "{{$c.message}}"
+            }
+            {{end}}
+            ]
+          }
   trigger.on-created: |
     - description: Application is created.
       oncePer: app.metadata.name
@@ -105,9 +274,9 @@ data:
   #### Custom definitions ####
   service.webhook.events-aggregator: |
     url: http://dev-frontends-flaskapp-git-frontends-flaskapp-svc.dev:8080/
-    #headers: #optional headers
-    #- name: <header-name>
-    #  value: <header-value>
+    headers: #optional headers
+    - name: Content-Type
+      value: application/json
     #basicAuth: #optional username password
     #  username: <username>
     #  password: <api-key>

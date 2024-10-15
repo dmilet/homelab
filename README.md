@@ -400,7 +400,8 @@ argocd app create dev \
     --dest-namespace argocd \
     --dest-server https://kubernetes.default.svc \
     --repo https://github.com/dmilet/homelab-deployments.git \
-    --path app-of-apps/dev
+    --path app-of-apps/dev \
+    --directory-recurse
 argocd app create prod \
     --project default \
     --dest-namespace argocd \
