@@ -6,27 +6,15 @@ data:
         method: POST
         path: /
         body: |
-          { "app": "{{.app.metadata.name}}",
+          { "appname": "{{.app.metadata.name}}",
             "deploymentid": "{{ .app.metadata.labels.deploymentid }}",
             "appversion": "{{ .app.metadata.labels.appversion }}",
-            "fields": [
-            {
-              "title": "Sync Status",
-              "value": "{{.app.status.sync.status}}"
-            },
-            {
-              "title": "Repository",
-              "value": "{{.app.spec.source.repoURL}}"
-            }
-            {{range $index, $c := .app.status.conditions}}
-            {{if not $index}},{{end}}
-            {{if $index}},{{end}}
-            {
-              "title": "{{$c.type}}",
-              "value": "{{$c.message}}"
-            }
-            {{end}}
-            ]
+            "namespace":  "{{ .app.spec.destination.namespace }}",
+            "server":   "{{ .app.spec.destination.server }}",
+            "syncStatus":   "{{ .app.status.sync.status }}",
+            "healthStatus":   "{{ .app.status.health.status }}",
+            "reconciledAt":   "{{ .app.status.reconciledAt }}",
+            "operationState":   "{{ .app.status.operationState }}"
           }
 
   template.app-deleted: |
@@ -35,27 +23,15 @@ data:
         method: POST
         path: /
         body: |
-          { "app": "{{.app.metadata.name}}",
+          { "appname": "{{.app.metadata.name}}",
             "deploymentid": "{{ .app.metadata.labels.deploymentid }}",
             "appversion": "{{ .app.metadata.labels.appversion }}",
-            "fields": [
-            {
-              "title": "Sync Status",
-              "value": "{{.app.status.sync.status}}"
-            },
-            {
-              "title": "Repository",
-              "value": "{{.app.spec.source.repoURL}}"
-            }
-            {{range $index, $c := .app.status.conditions}}
-            {{if not $index}},{{end}}
-            {{if $index}},{{end}}
-            {
-              "title": "{{$c.type}}",
-              "value": "{{$c.message}}"
-            }
-            {{end}}
-            ]
+            "namespace":  "{{ .app.spec.destination.namespace }}",
+            "server":   "{{ .app.spec.destination.server }}",
+            "syncStatus":   "{{ .app.status.sync.status }}",
+            "healthStatus":   "{{ .app.status.health.status }}",
+            "reconciledAt":   "{{ .app.status.reconciledAt }}",
+            "operationState":   "{{ .app.status.operationState }}"
           }
   template.app-deployed: |
     webhook:
@@ -63,27 +39,15 @@ data:
         method: POST
         path: /
         body: |
-          { "app": "{{.app.metadata.name}}",
+          { "appname": "{{.app.metadata.name}}",
             "deploymentid": "{{ .app.metadata.labels.deploymentid }}",
             "appversion": "{{ .app.metadata.labels.appversion }}",
-            "fields": [
-            {
-              "title": "Sync Status",
-              "value": "{{.app.status.sync.status}}"
-            },
-            {
-              "title": "Repository",
-              "value": "{{.app.spec.source.repoURL}}"
-            }
-            {{range $index, $c := .app.status.conditions}}
-            {{if not $index}},{{end}}
-            {{if $index}},{{end}}
-            {
-              "title": "{{$c.type}}",
-              "value": "{{$c.message}}"
-            }
-            {{end}}
-            ]
+            "namespace":  "{{ .app.spec.destination.namespace }}",
+            "server":   "{{ .app.spec.destination.server }}",
+            "syncStatus":   "{{ .app.status.sync.status }}",
+            "healthStatus":   "{{ .app.status.health.status }}",
+            "reconciledAt":   "{{ .app.status.reconciledAt }}",
+            "operationState":   "{{ .app.status.operationState }}"
           }
   template.app-health-degraded: |
     webhook:
@@ -91,27 +55,15 @@ data:
         method: POST
         path: /
         body: |
-          { "app": "{{.app.metadata.name}}",
+          { "appname": "{{.app.metadata.name}}",
             "deploymentid": "{{ .app.metadata.labels.deploymentid }}",
             "appversion": "{{ .app.metadata.labels.appversion }}",
-            "fields": [
-            {
-              "title": "Sync Status",
-              "value": "{{.app.status.sync.status}}"
-            },
-            {
-              "title": "Repository",
-              "value": "{{.app.spec.source.repoURL}}"
-            }
-            {{range $index, $c := .app.status.conditions}}
-            {{if not $index}},{{end}}
-            {{if $index}},{{end}}
-            {
-              "title": "{{$c.type}}",
-              "value": "{{$c.message}}"
-            }
-            {{end}}
-            ]
+            "namespace":  "{{ .app.spec.destination.namespace }}",
+            "server":   "{{ .app.spec.destination.server }}",
+            "syncStatus":   "{{ .app.status.sync.status }}",
+            "healthStatus":   "{{ .app.status.health.status }}",
+            "reconciledAt":   "{{ .app.status.reconciledAt }}",
+            "operationState":   "{{ .app.status.operationState }}"
           }
   template.app-sync-failed: |
     webhook:
@@ -119,27 +71,15 @@ data:
         method: POST
         path: /
         body: |
-          { "app": "{{.app.metadata.name}}",
+          { "appname": "{{.app.metadata.name}}",
             "deploymentid": "{{ .app.metadata.labels.deploymentid }}",
             "appversion": "{{ .app.metadata.labels.appversion }}",
-            "fields": [
-            {
-              "title": "Sync Status",
-              "value": "{{.app.status.sync.status}}"
-            },
-            {
-              "title": "Repository",
-              "value": "{{.app.spec.source.repoURL}}"
-            }
-            {{range $index, $c := .app.status.conditions}}
-            {{if not $index}},{{end}}
-            {{if $index}},{{end}}
-            {
-              "title": "{{$c.type}}",
-              "value": "{{$c.message}}"
-            }
-            {{end}}
-            ]
+            "namespace":  "{{ .app.spec.destination.namespace }}",
+            "server":   "{{ .app.spec.destination.server }}",
+            "syncStatus":   "{{ .app.status.sync.status }}",
+            "healthStatus":   "{{ .app.status.health.status }}",
+            "reconciledAt":   "{{ .app.status.reconciledAt }}",
+            "operationState":   "{{ .app.status.operationState }}"
           }
   template.app-sync-running: |
     webhook:
@@ -147,27 +87,15 @@ data:
         method: POST
         path: /
         body: |
-          { "app": "{{.app.metadata.name}}",
+          { "appname": "{{.app.metadata.name}}",
             "deploymentid": "{{ .app.metadata.labels.deploymentid }}",
             "appversion": "{{ .app.metadata.labels.appversion }}",
-            "fields": [
-            {
-              "title": "Sync Status",
-              "value": "{{.app.status.sync.status}}"
-            },
-            {
-              "title": "Repository",
-              "value": "{{.app.spec.source.repoURL}}"
-            }
-            {{range $index, $c := .app.status.conditions}}
-            {{if not $index}},{{end}}
-            {{if $index}},{{end}}
-            {
-              "title": "{{$c.type}}",
-              "value": "{{$c.message}}"
-            }
-            {{end}}
-            ]
+            "namespace":  "{{ .app.spec.destination.namespace }}",
+            "server":   "{{ .app.spec.destination.server }}",
+            "syncStatus":   "{{ .app.status.sync.status }}",
+            "healthStatus":   "{{ .app.status.health.status }}",
+            "reconciledAt":   "{{ .app.status.reconciledAt }}",
+            "operationState":   "{{ .app.status.operationState }}"
           }
   template.app-sync-status-unknown: |
     webhook:
@@ -175,27 +103,15 @@ data:
         method: POST
         path: /
         body: |
-          { "app": "{{.app.metadata.name}}",
+          { "appname": "{{.app.metadata.name}}",
             "deploymentid": "{{ .app.metadata.labels.deploymentid }}",
             "appversion": "{{ .app.metadata.labels.appversion }}",
-            "fields": [
-            {
-              "title": "Sync Status",
-              "value": "{{.app.status.sync.status}}"
-            },
-            {
-              "title": "Repository",
-              "value": "{{.app.spec.source.repoURL}}"
-            }
-            {{range $index, $c := .app.status.conditions}}
-            {{if not $index}},{{end}}
-            {{if $index}},{{end}}
-            {
-              "title": "{{$c.type}}",
-              "value": "{{$c.message}}"
-            }
-            {{end}}
-            ]
+            "namespace":  "{{ .app.spec.destination.namespace }}",
+            "server":   "{{ .app.spec.destination.server }}",
+            "syncStatus":   "{{ .app.status.sync.status }}",
+            "healthStatus":   "{{ .app.status.health.status }}",
+            "reconciledAt":   "{{ .app.status.reconciledAt }}",
+            "operationState":   "{{ .app.status.operationState }}"
           }
   template.app-sync-succeeded: |
     webhook:
@@ -203,27 +119,15 @@ data:
         method: POST
         path: /
         body: |
-          { "app": "{{.app.metadata.name}}",
+          { "appname": "{{.app.metadata.name}}",
             "deploymentid": "{{ .app.metadata.labels.deploymentid }}",
             "appversion": "{{ .app.metadata.labels.appversion }}",
-            "fields": [
-            {
-              "title": "Sync Status",
-              "value": "{{.app.status.sync.status}}"
-            },
-            {
-              "title": "Repository",
-              "value": "{{.app.spec.source.repoURL}}"
-            }
-            {{range $index, $c := .app.status.conditions}}
-            {{if not $index}},{{end}}
-            {{if $index}},{{end}}
-            {
-              "title": "{{$c.type}}",
-              "value": "{{$c.message}}"
-            }
-            {{end}}
-            ]
+            "namespace":  "{{ .app.spec.destination.namespace }}",
+            "server":   "{{ .app.spec.destination.server }}",
+            "syncStatus":   "{{ .app.status.sync.status }}",
+            "healthStatus":   "{{ .app.status.health.status }}",
+            "reconciledAt":   "{{ .app.status.reconciledAt }}",
+            "operationState":   "{{ .app.status.operationState }}"
           }
   trigger.on-created: |
     - description: Application is created.
