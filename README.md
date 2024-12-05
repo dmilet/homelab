@@ -498,3 +498,22 @@ kubectl port-forward -n nxrm  svc/lab-nxrm-nexusrepo 8444:8444
 ```
 
 
+# Updates
+## 2024-12-04 - error: unsupported configuration: Security driver model 'apparmor' is not available
+```
+└─# virsh start Ubuntu-MicroK8S-Node1
+error: Failed to start domain 'Ubuntu-MicroK8S-Node1'
+error: unsupported configuration: Security driver model 'apparmor' is not available
+```
+
+Fix:
+```
+virsh save-image-edit /var/lib/libvirt/qemu/save/Ubuntu-MicroK8S-Node1.save
+```
+
+Remove apparmor line at the end.
+
+Then
+```
+virsh start Ubuntu-MicroK8S-Node1
+```
