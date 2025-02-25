@@ -1,79 +1,130 @@
-# Home Lab Setup
-## GitHub 
-
-### Personal Access Tokens
-Date: 2025-02-24
-https://github.com/settings/tokens?type=beta
-
-![homelab-actions-rw](pics/homelab-actions-rw.png)
-![homelab-ro](pics/homelab-ro.png)
-
-Date: 2025-02-24
-https://app.docker.com/settings/personal-access-tokens
-![dockerhub-tokens](pics/dh-tokens.png)
-
-
-## WSL Ubuntu
-### Fix WSL Ubuntu to support python virtual environments
-```
-sudo apt-get update
-sudo apt-get install libpython3-dev
-sudo apt-get install python3-venv
-```
-Reference: [Installing venv for python3 in WSL (Ubuntu)](https://stackoverflow.com/questions/61528500/installing-venv-for-python3-in-wsl-ubuntu)
-
-### install docker
-```
- sudo apt install docker.io
-```
-
-### install net-tools
-```
-sudo apt install net-tools
-```
 
 ## Linux Laptop
-### Lubuntu
-Date: 2025-02-24
 
-https://ubuntu.com/desktop/flavours
+Configure Virtual Bridge virbr0
+```
+3: virbr0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default qlen 1000
+    link/ether 52:54:00:b8:e9:81 brd ff:ff:ff:ff:ff:ff
+    inet 10.23.58.30/24 brd 10.23.58.255 scope global virbr0
+       valid_lft forever preferred_lft forever
+```
+![nm-connection-editor](pics/nm-connection-editor_virbr0.png)
+
+### MicroK8s
+Date: 2024-03-17
+#### Network Bridge (virbr0) 
+![nm-connection-editor](pics/virt-manager_virtual_networks_default.png)
+
+#### Create Disk
+```console
+sudo -iu root
+cd /var/lib/libvirt/images
+qemu-img create -f qcow2 umksn1.qcow2 20G
+qemu-img create -f qcow2 umksn1-pvc.qcow2 20G
+chown libvirt-qemu:libvirt-qemu umksn1.qcow2
+chown libvirt-qemu:libvirt-qemu umksn1-pvc.qcow2
+
+ls -l umksn1.qcow2
+-rw-r--r-- 1 libvirt-qemu libvirt-qemu      196928 Mar 17 13:43 umksn1.qcow2
+ls -l umksn1-pvc.qcow2
+-rw-r--r-- 1 libvirt-qemu libvirt-qemu 196928 Apr 19 11:32 umksn1-pvc.qcow2
+```
+
+#### Install Ubuntu Server
+[Ubuntu Server 22.04.4 LTS ISO media](https://releases.ubuntu.com/jammy/ubuntu-22.04.4-live-server-amd64.iso)
+
+| Item | Value |
+| ---- | --------------------- | 
+| Name | Ubuntu-MicroK8S-Node1 |
+| OS   | [Ubuntu Server 22.04.4 LTS ISO media](https://releases.ubuntu.com/jammy/ubuntu-22.04.4-live-server-amd64.iso) | 
+| RAM  | 8 GB |
+| CPU  | 4    |
+| Disk1 | 20GB. Attach umksn1.qcow2 disk (see above) |
+| Disk2 | 20GB. Attach umksn1-pvc.qcow2 disk (see above) |
+| Network | virbr0 | 
+
+
+Note: to attach disk device, create XML file like
+```
+<disk type="file" device="disk">
+  <driver name="qemu" type="qcow2"/>
+  <source file="/var/lib/libvirt/images/umksn1-pvc.qcow2"/>
+  <target dev="vdb" bus="virtio"/>
+</disk>
+```
+Then, attach to VM
+```
+virsh attach-device --config Ubuntu-MicroK8S-Node1 vdb.xml
+```
+
+Install OpenSSH server
+
+Install MicroK8s snap
 
 After reboot
 ```
 sudo apt upgrade
-sudo apt install net-tools podman
+sudo apt install net-tools
 ```
 
-### ssh
+Connect to console, and check assigned IP address
 ```
-ssh-keygen
+david@umksn1:~$ ip addr | head -n 10
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 52:54:00:c3:31:c4 brd ff:ff:ff:ff:ff:ff
+    inet 10.23.58.134/24 metric 100 brd 10.23.58.255 scope global dynamic enp1s0
+       valid_lft 2040sec preferred_lft 2040sec
+
 ```
-Then copy `~/.ssh/id_ed25519.pub` to GitHub profile
 
-### i3wm
-Date: 2025-02-24
+Add entry to /etc/hosts on Host (Linux Laptop)
+```
+└─# tail -n 2 /etc/hosts
 
-[Setup instructions (YouTube)](https://www.youtube.com/watch?v=1TQCrj7_G0I)
+10.23.58.134 umksn1
+```
 
-#### status bar
-[config](configs/i3wm/i3status.conf)
+From Host, install own ssh public key to Ubuntu Server VM
+```
+└─$ ssh-copy-id -i ~/.ssh/id_rsa david@umksn1
+/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "/home/david/.ssh/id_rsa.pub"                                                              
+/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed                                       
+/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys                                     
+david@umksn1's password:                                                                                                                                 
+                                                                                                                                                         
+Number of key(s) added: 1                                                                                                                                
+                                                                                                                                                         
+Now try logging into the machine, with:   "ssh 'david@umksn1'"                                                                                           
+and check to make sure that only the key(s) you wanted were added.                                             
+```
 
-### Visual Studio Code
-https://code.visualstudio.com/docs/setup/linux
+Create VG on /dev/vdb for the persistent storage
+```
+pvcreate /dev/vdb
+vgcreate pvc-vg /dev/vdb
+vgs
+  VG        #PV #LV #SN Attr   VSize   VFree
+  pvc-vg      1   0   0 wz--n- <20.00g <20.00g
+  ubuntu-vg   1   1   0 wz--n-  18.22g  20.00m
 
-### Podman desktop
-https://podman-desktop.io/docs/installation/linux-install
+mkdir /pvc
+lvcreate -n pvc-lv -l 5119 /dev/pvc-vg
+mkfs.xfs /dev/pvc-vg/pvc-lv
+echo "/dev/pvc-vg/pvc-lv /pvc xfs defaults" >> /etc/fstab
+mount -a
+chmod 777 /pvc
+```
 
 
-
-### MicroK8s
-Date: 2025-02-24<br>
-
-[MicroK8s Ubuntu](https://ubuntu.com/tutorials/install-a-local-kubernetes-with-microk8s#1-overview)
-
-[MicroK8s Website](https://microk8s.io/docs/getting-started)
-
-
+#### MicroK8s installation
+[MicroK8s](https://microk8s.io/docs/getting-started)
+In the Ubuntu Server Guest VM
 ```
 sudo usermod -a -G microk8s $USER
 sudo chown -R $USER ~/.kube
@@ -82,63 +133,57 @@ newgrp microk8s
 sudo reboot
 ```
 
-#### Upgrade MicroK8s
+
+Upgrade MicroK8s
 ```
-sudo snap refresh microk8s --channel 1.32
+sudo snap refresh microk8s --channel 1.31
 ```
 
 Enable add-ons
 ```
 microk8s enable hostpath-storage
-microk8s enable metallb
 microk8s enable ingress
 microk8s enable dashboard
-microk8s enable observability
-microk8s enable metrics-server
-microk8s enable ha-cluster
-microk8s enable helm3
 ```
 
 Check status
 ```
-~$ microk8s status
+david@umksn1:~$ microk8s status
 microk8s is running
 high-availability: no
   datastore master nodes: 127.0.0.1:19001
   datastore standby nodes: none
 addons:
   enabled:
-    dashboard            # (core) The Kubernetes dashboard
-    dns                  # (core) CoreDNS
-    ha-cluster           # (core) Configure high availability on the current node
-    helm                 # (core) Helm - the package manager for Kubernetes
-    helm3                # (core) Helm 3 - the package manager for Kubernetes
-    hostpath-storage     # (core) Storage class; allocates storage from host directory
-    ingress              # (core) Ingress controller for external access
-    metallb              # (core) Loadbalancer for your Kubernetes cluster
-    metrics-server       # (core) K8s Metrics Server for API access to service metrics
-    observability        # (core) A lightweight observability stack for logs, traces and metrics
-    storage              # (core) Alias to hostpath-storage add-on, deprecated
+	dashboard        	# (core) The Kubernetes dashboard
+	dns              	# (core) CoreDNS
+	ha-cluster       	# (core) Configure high availability on the current node
+	helm             	# (core) Helm - the package manager for Kubernetes
+	helm3            	# (core) Helm 3 - the package manager for Kubernetes
+	hostpath-storage 	# (core) Storage class; allocates storage from host directory
+	ingress          	# (core) Ingress controller for external access
+	metrics-server   	# (core) K8s Metrics Server for API access to service metrics
+	storage          	# (core) Alias to hostpath-storage add-on, deprecated
   disabled:
-    cert-manager         # (core) Cloud native certificate management
-    cis-hardening        # (core) Apply CIS K8s hardening
-    community            # (core) The community addons repository
-    gpu                  # (core) Alias to nvidia add-on
-    host-access          # (core) Allow Pods connecting to Host services smoothly
-    kube-ovn             # (core) An advanced network fabric for Kubernetes
-    mayastor             # (core) OpenEBS MayaStor
-    minio                # (core) MinIO object storage
-    nvidia               # (core) NVIDIA hardware (GPU and network) support
-    prometheus           # (core) Prometheus operator for monitoring and logging
-    rbac                 # (core) Role-Based Access Control for authorisation
-    registry             # (core) Private image registry exposed on localhost:32000
-    rook-ceph            # (core) Distributed Ceph storage using Rook
+	cert-manager     	# (core) Cloud native certificate management
+	cis-hardening    	# (core) Apply CIS K8s hardening
+	community        	# (core) The community addons repository
+	gpu              	# (core) Automatic enablement of Nvidia CUDA
+	host-access      	# (core) Allow Pods connecting to Host services smoothly
+	kube-ovn         	# (core) An advanced network fabric for Kubernetes
+	mayastor         	# (core) OpenEBS MayaStor
+	metallb          	# (core) Loadbalancer for your Kubernetes cluster
+	minio            	# (core) MinIO object storage
+	observability    	# (core) A lightweight observability stack for logs, traces and metrics
+	prometheus       	# (core) Prometheus operator for monitoring and logging
+	rbac             	# (core) Role-Based Access Control for authorisation
+	registry         	# (core) Private image registry exposed on localhost:32000
+	rook-ceph        	# (core) Distributed Ceph storage using Rook
 ```
 
 Add kubectl alias
 ```
 echo alias kubectl=\"microk8s kubectl\" >> ~/.profile
-echo alias kubectl=\"microk8s kubectl\" >> ~/.zshrc
 ```
 
 Log off and log back in
@@ -152,6 +197,25 @@ kube-public   	Active   9h
 kube-system   	Active   9h
 ```
 
+Install KUBECONFIG file in MicroK8s VM
+```
+mkdir -p ~/.kube
+microk8s config > ~/.kube/config
+```
+
+Install KUBECONFIG file in Host Linux Laptop.
+```
+mkdir -p ~/.kube
+scp david@umksn1:/home/david/.kube/config ~/.kube/config
+chmod 600 ~/.kube/config
+
+
+┌──(david㉿kali-PF37QNB7)-[~]
+└─$ kubectl auth whoami
+ATTRIBUTE   VALUE
+Username	admin
+Groups  	[system:masters system:authenticated]
+```
 
 Create namespaces
 ```
@@ -162,23 +226,10 @@ kubectl create ns postgres
 kubectl create ns hashivault
 ```
 
-
-
-Login from podman, using read-only Docker Hub token
+Create Secret to Docker Hub
 ```
-podman login -u davidmilet docker.io
-```
-
-
-Create Secret to Docker Hub, this will allow Kubernetes to pull images from davidmilet private repository
-```
-kubectl create secret generic dockerhub -n dev --from-file=.dockerconfigjson=/run/user/1000/containers/auth.json --type=kubernetes.io/dockerconfigjson
-kubectl create secret generic dockerhub -n prod --from-file=.dockerconfigjson=/run/user/1000/containers/auth.json --type=kubernetes.io/dockerconfigjson
-```
-
-Create symlink to default hostpath storage location
-```
-sudo ln -s /var/snap/microk8s/common/default-storage /pvc
+kubectl create secret generic dockerhub -n dev --from-file=.dockerconfigjson=/home/david/.docker/config.json --type=kubernetes.io/dockerconfigjson
+kubectl create secret generic dockerhub -n prod --from-file=.dockerconfigjson=/home/david/.docker/config.json --type=kubernetes.io/dockerconfigjson
 ```
 
 Create Storage Class for PVC, under 
@@ -195,7 +246,7 @@ parameters:
 volumeBindingMode: WaitForFirstConsumer
 
 
-kubectl apply -f microk8s-custom-hostpath-pvc.taml
+kubectl apply -f microk8s-custom-hostpath-pvc.yaml
 
 kubectl get sc
 NAME                           PROVISIONER            RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
