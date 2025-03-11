@@ -41,7 +41,13 @@ https://ubuntu.com/desktop/flavours
 After reboot
 ```
 sudo apt upgrade
-sudo apt install net-tools podman
+sudo apt install git net-tools podman
+```
+
+### git config
+```
+$ git config --global user.email "david.milet@gmail.com"
+$ git config --global user.name "David Milet"
 ```
 
 ### ssh
