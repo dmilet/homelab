@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    metallb.io/ip-allocated-from-pool: default-addresspool
+    metallb.universe.tf/allow-shared-ip: ingress-192.168.100.100
+    metallb.universe.tf/loadBalancerIPs: 192.168.100.100
+  name: argo-cd-argocd-server-l4-ext
+spec:
+  type: LoadBalancer
+  sessionAffinity: None
+  allocateLoadBalancerNodePorts: true
+  internalTrafficPolicy: Cluster
+  externalTrafficPolicy: Cluster
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 8080
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app.kubernetes.io/instance: argo-cd
+    app.kubernetes.io/name: argocd-server

@@ -1,4 +1,18 @@
 # Home Lab Setup
+## SSH key
+### Generate private key
+`
+ssh-keygen -C david@lab -t ed25519
+`
+
+### Upload public key to GitHub
+https://github.com/settings/keys
+
+### Install private and public key on all lab hosts
+
+
+
+
 ## GitHub 
 
 ### Personal Access Tokens
@@ -150,12 +164,14 @@ echo alias kubectl=\"microk8s kubectl\" >> ~/.zshrc
 Log off and log back in
 ```
 $ kubectl get namespaces
-NAME          	STATUS   AGE
-default       	Active   9h
-ingress       	Active   8h
-kube-node-lease   Active   9h
-kube-public   	Active   9h
-kube-system   	Active   9h
+NAME              STATUS   AGE
+default           Active   23h
+ingress           Active   2m15s
+kube-node-lease   Active   23h
+kube-public       Active   23h
+kube-system       Active   23h
+metallb-system    Active   2m37s
+observability     Active   119s
 ```
 
 
