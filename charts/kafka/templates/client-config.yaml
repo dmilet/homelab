@@ -1,0 +1,13 @@
+apiVersion: v1
+data:
+  client-config.properties: |
+    security.protocol=SASL_PLAINTEXT
+    sasl.mechanism=SCRAM-SHA-256
+    # set .Values.user1.password to $(kubectl get secret lab-secrets -o jsonpath='{.data.client-passwords}' -n kafka-zk | base64 -d)
+    # helm upgrade -i kafka-lab-zkmode . \
+    # --values values-kakfa-with-zookeeper.yaml \
+    # --set-string user1.password="$(kubectl get secret lab-secrets -o jsonpath='{.data.client-passwords}' -n kafka-zk | base64 -d)"
+    sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule required username="user1" password="{{ .Values.user1.password }}";
+kind: ConfigMap
+metadata:
+  name: client-config
